@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Add/Edit/View Products</title>
+	<style type="text/css">
+		table {
+		  border-collapse: collapse;
+		}
+		 th {
+		  background: #ccc;
+		}
+
+		th, td {
+		  border: 1px solid #ccc;
+		  padding: 8px;
+		}
+
+		tr:nth-child(even) {
+		  background: #efefef;
+		}
+
+		tr:hover {
+		  background: #d1d1d1;
+		}
+		th {
+			text-align: left;
+		}
+	</style>
+</head>
+<body>
+	<h1>Product List</h1>
+	<p>To add product, click on add button. To edit, press edit button against the column you want to edit.</p>
+	<table style="width:100%" id="table-main">
+	  <tr>
+	    <th>Id</th>
+	    <th>Name</th>
+	  </tr>
+	</table>
+	<br>
+	<div>
+		<label>Name:</label>
+		<input type="text" id="add-prod-name">
+		<button id="new-prod">Add</button>
+	</div>
+	<br>
+	<div>
+		<label>Id:</label>
+		<input type="text" id="mod-prod-id">
+		<label>Name:</label>
+		<input type="text" id="mod-prod-name">		
+		<button id="modify-prod">Modify</button>
+	</div>
+</body>
+<script type="text/javascript">
+	let data = JSON.parse('{{ data | tojson }}');
+	console.log(data)
+	let products = data["products"];
+	for(let i=0; i<products.length; i++){
+		let tr = document.createElement('tr');
+		let td_id = document.createElement('td');
+		let td_name = document.createElement('td');
+		// let td_edit = document.createElement('td');
+		// let edit_button = document.createElement('button');
+		// edit_button.innerHTML = "Edit";
+		// edit_button.setAttribute('td_id', td_id);
+		// td_edit.appendChild(edit_button);
+		td_id.innerHTML = products[i]["id"];
+		td_name.innerHTML = products[i]["name"];
+		tr.appendChild(td_id);
+		tr.appendChild(td_name);
+		// tr.appendChild(td_edit);
+		document.getElementById('table-main').appendChild(tr);
+	}
+
+	// add handlers for add
+	const addBtn = document.getElementById('new-prod');
+	addBtn.onclick = (e) => {
+		const addName = document.getElementById('add-prod-name').value;
+		const formData = new FormData();
+		formData.append('name', addName);
+		fetch("/add_product", {
+		    method: 'post',
+		    body: formData,
+
+		})
+		.then(res => {
+			console.log(res.data)
+			return res.json()
+		})
+		.then(body => {
+			if(body["success"]){
+				document.location = "/products"
+			}
+		})
+		.catch(err => {
+			console.log(err);
+		})
+	}
+	// add handlers for add
+	const editBtn = document.getElementById('modify-prod');
+	editBtn.onclick = (e) => {
+		const modId = document.getElementById('mod-prod-id').value;
+		const modName = document.getElementById('mod-prod-name').value;
+		const formData = new FormData();
+		formData.append('name', modName);
+		formData.append('id', modId);
+		fetch("/edit_product", {
+		    method: 'post',
+		    body: formData,
+
+		})
+		.then(res => {
+			console.log(res.data)
+			return res.json()
+		})
+		.then(body => {
+			if(body["success"]){
+				document.location = "/products"
+			}
+		})
+		.catch(err => {
+			console.log(err);
+		})
+	}
+
+
+
+</script>
+</html>

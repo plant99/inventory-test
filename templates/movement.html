@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Add/Edit/View Locations</title>
+	<style type="text/css">
+		table {
+		  border-collapse: collapse;
+		}
+		 th {
+		  background: #ccc;
+		}
+
+		th, td {
+		  border: 1px solid #ccc;
+		  padding: 8px;
+		}
+
+		tr:nth-child(even) {
+		  background: #efefef;
+		}
+
+		tr:hover {
+		  background: #d1d1d1;
+		}
+		th {
+			text-align: left;
+		}
+	</style>
+</head>
+<body>
+	<h1>Location List</h1>
+	<p>To add location, click on add button. To edit, press edit button against the column you want to edit.</p>
+	<table style="width:100%" id="table-main">
+	  <tr>
+	    <th>Id</th>
+	    <th>From</th>
+	    <th>To</th>
+	    <th>Time</th>
+	    <th>Product Id</th>
+	    <th>Qty</th>
+	  </tr>
+	</table>
+	<br>
+	<div>
+		<label>Name:</label>
+		<input type="text" id="add-loc-name">
+		<button id="new-loc">Add</button>
+	</div>
+	<br>
+	<div>
+		<label>Id:</label>
+		<input type="text" id="mod-loc-id">
+		<label>Name:</label>
+		<input type="text" id="mod-loc-name">		
+		<button id="modify-loc">Modify</button>
+	</div>
+</body>
+<script type="text/javascript">
+	let data = JSON.parse('{{ data | tojson }}');
+	console.log(data)
+	let locations = data["locations"];
+	for(let i=0; i<locations.length; i++){
+		let tr = document.createElement('tr');
+		let td_id = document.createElement('td');
+		let td_from = document.createElement('td');
+		let td_to = document.createElement('td');
+		let td_time = document.createElement('td');
+		let td_product = document.createElement('td');
+		let td_qty = document.createElement('td');
+		td_id.innerHTML = locations[i]["id"];
+		td_name.innerHTML = locations[i]["name"];
+		tr.appendChild(td_id);
+		tr.appendChild(td_name);
+		// tr.appendChild(td_edit);
+		document.getElementById('table-main').appendChild(tr);
+	}
+
+	// add handlers for add
+	const addBtn = document.getElementById('new-loc');
+	addBtn.onclick = (e) => {
+		const addName = document.getElementById('add-loc-name').value;
+		const formData = new FormData();
+		formData.append('name', addName);
+		fetch("/add_location", {
+		    method: 'post',
+		    body: formData,
+
+		})
+		.then(res => {
+			console.log(res.data)
+			return res.json()
+		})
+		.then(body => {
+			if(body["success"]){
+				document.location = "/locations"
+			}
+		})
+		.catch(err => {
+			console.log(err);
+		})
+	}
+	// add handlers for add
+	const editBtn = document.getElementById('modify-loc');
+	editBtn.onclick = (e) => {
+		const modId = document.getElementById('mod-loc-id').value;
+		const modName = document.getElementById('mod-loc-name').value;
+		const formData = new FormData();
+		formData.append('name', modName);
+		formData.append('id', modId);
+		fetch("/edit_location", {
+		    method: 'post',
+		    body: formData,
+
+		})
+		.then(res => {
+			console.log(res.data)
+			return res.json()
+		})
+		.then(body => {
+			if(body["success"]){
+				document.location = "/locations"
+			}
+		})
+		.catch(err => {
+			console.log(err);
+		})
+	}
+
+
+
+</script>
+</html>

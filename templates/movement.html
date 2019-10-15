@@ -35,53 +35,119 @@
 	    <th>Id</th>
 	    <th>From</th>
 	    <th>To</th>
-	    <th>Time</th>
 	    <th>Product Id</th>
 	    <th>Qty</th>
+	    <th>Time</th>
 	  </tr>
 	</table>
 	<br>
 	<div>
-		<label>Name:</label>
-		<input type="text" id="add-loc-name">
-		<button id="new-loc">Add</button>
+		<label>From:</label>
+		<input type="number" id="add-from-mov">
+		<label>To:</label>
+		<input type="number" id="add-to-mov">
+		<label>Product No:</label>
+		<input type="number" id="add-prod-mov">
+		<label>Qty:</label>
+		<input type="number" id="add-qty-mov">
+		<button id="new-mov">Add</button>
 	</div>
 	<br>
 	<div>
 		<label>Id:</label>
-		<input type="text" id="mod-loc-id">
-		<label>Name:</label>
-		<input type="text" id="mod-loc-name">		
-		<button id="modify-loc">Modify</button>
+		<input type="text" id="edit-id-mov">
+		<label>From:</label>
+		<input type="number" id="edit-from-mov">
+		<label>To:</label>
+		<input type="number" id="edit-to-mov">
+		<label>Product No:</label>
+		<input type="number" id="edit-prod-mov">
+		<label>Qty:</label>
+		<input type="number" id="edit-qty-mov">
+		<button id="edit-mov">Modify</button>
+	</div>
+	<hr>
+	<h1>Report</h1>
+	<div id="report-div">
+
 	</div>
 </body>
 <script type="text/javascript">
 	let data = JSON.parse('{{ data | tojson }}');
 	console.log(data)
-	let locations = data["locations"];
-	for(let i=0; i<locations.length; i++){
+	let movements = data["movements"];
+	let locationTotals = data["location_totals"];
+	//  render report
+	let html = '';
+	for(let key in locationTotals){
+		if(!locationTotals.hasOwnProperty(key)){
+			continue;
+		}
+		let location = locationTotals[key];
+		let counts = location.counts;
+		let tr_values = '';
+		for(let key1 in counts){
+			if(!counts.hasOwnProperty(key1)){
+				continue;
+			}
+			let project = counts[key1];
+			let row = `<tr>
+				<td>${project.name}</td>
+				<td>${project.count}</td>
+			</tr>`;
+			tr_values += row;
+		}
+		html += `
+		<p>Location ${location.name}</p>
+		<table>
+			<tr>
+			    <th>Product Name</th>
+			    <th>Quantity</th>
+			</tr>
+			${tr_values}
+		</table>`;
+		console.log(html);
+	}
+
+	document.getElementById('report-div').innerHTML = html;
+	console.log(locationTotals);
+	// console.log(movements)
+	for(let i=0; i<movements.length; i++){
 		let tr = document.createElement('tr');
 		let td_id = document.createElement('td');
 		let td_from = document.createElement('td');
 		let td_to = document.createElement('td');
-		let td_time = document.createElement('td');
 		let td_product = document.createElement('td');
 		let td_qty = document.createElement('td');
-		td_id.innerHTML = locations[i]["id"];
-		td_name.innerHTML = locations[i]["name"];
+		let td_time = document.createElement('td')
+		td_id.innerHTML = movements[i]["id"];
+		td_from.innerHTML = movements[i]["from"] + '(' + movements[i]["from_id"] +')';
+		td_to.innerHTML = movements[i]["to"] + '(' + movements[i]["to_id"] +')';
+		td_product.innerHTML = movements[i]["prod"] + '(' + movements[i]["prod_id"] +')';
+		td_qty.innerHTML = movements[i]["qty"]
+		td_time.innerHTML = movements[i]["time"]
 		tr.appendChild(td_id);
-		tr.appendChild(td_name);
-		// tr.appendChild(td_edit);
+		tr.appendChild(td_from);
+		tr.appendChild(td_to);
+		tr.appendChild(td_product);
+		tr.appendChild(td_qty);
+		tr.appendChild(td_time);
 		document.getElementById('table-main').appendChild(tr);
 	}
 
 	// add handlers for add
-	const addBtn = document.getElementById('new-loc');
+	const addBtn = document.getElementById('new-mov');
 	addBtn.onclick = (e) => {
-		const addName = document.getElementById('add-loc-name').value;
+		const from = document.getElementById('add-from-mov').value;
+		const to = document.getElementById('add-to-mov').value;
+		const qty = document.getElementById('add-qty-mov').value;
+		const prod = document.getElementById('add-prod-mov').value;
 		const formData = new FormData();
-		formData.append('name', addName);
-		fetch("/add_location", {
+		formData.append('from', from);
+		formData.append('to', to);
+		formData.append('qty', qty);
+		formData.append('prod', prod);
+		fetch("/add_movement", {
 		    method: 'post',
 		    body: formData,
 
@@ -92,7 +158,7 @@
 		})
 		.then(body => {
 			if(body["success"]){
-				document.location = "/locations"
+				document.location = "/movements"
 			}
 		})
 		.catch(err => {
@@ -100,14 +166,20 @@
 		})
 	}
 	// add handlers for add
-	const editBtn = document.getElementById('modify-loc');
+	const editBtn = document.getElementById('edit-mov');
 	editBtn.onclick = (e) => {
-		const modId = document.getElementById('mod-loc-id').value;
-		const modName = document.getElementById('mod-loc-name').value;
+		const id = document.getElementById('edit-id-mov').value;
+		const from = document.getElementById('edit-from-mov').value;
+		const to = document.getElementById('edit-to-mov').value;
+		const qty = document.getElementById('edit-qty-mov').value;
+		const prod = document.getElementById('edit-prod-mov').value;
 		const formData = new FormData();
-		formData.append('name', modName);
-		formData.append('id', modId);
-		fetch("/edit_location", {
+		formData.append('from', from);
+		formData.append('id', id);
+		formData.append('to', to);
+		formData.append('qty', qty);
+		formData.append('prod', prod);
+		fetch("/edit_movement", {
 		    method: 'post',
 		    body: formData,
 
@@ -118,7 +190,7 @@
 		})
 		.then(body => {
 			if(body["success"]){
-				document.location = "/locations"
+				document.location = "/movements"
 			}
 		})
 		.catch(err => {

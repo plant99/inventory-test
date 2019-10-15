@@ -19,7 +19,7 @@ class Product(db.Model):
         self.name = name
 
     def __repr__(self):
-        return('<Product name {self.name}>')
+        return('<Product name {}>'.format(self.name))
 
 class Location(db.Model):
 
@@ -35,7 +35,7 @@ class Location(db.Model):
         self.name = name
 
     def __repr__(self):
-        return('<Product name {self.name}>')
+        return('<Location name {}>'.format(self.name))
 
 
 
@@ -45,8 +45,8 @@ class ProductMovement(db.Model):
     movement_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
     qty = db.Column(db.Integer)
-    from_location = db.Column(db.Integer, db.ForeignKey('locations.id'))
-    to_location = db.Column(db.Integer, db.ForeignKey('locations.id'))
+    from_location = db.Column(db.Integer, db.ForeignKey('locations.id', ondelete="cascade"), nullable=True)
+    to_location = db.Column(db.Integer, db.ForeignKey('locations.id', ondelete="cascade"), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     def __init__(self, product_id, from_location, to_location, qty=0):
